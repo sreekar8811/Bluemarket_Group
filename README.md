@@ -11,7 +11,7 @@ Blue Market is a Django-based e-commerce platform where customers can browse and
 ---
 
 ## Prerequisites
-- Python 3.8+
+- Python 3.10+
 - PostgreSQL
 - Razorpay Account (for Test API Keys)
 
@@ -30,7 +30,7 @@ cd "Blue market"
 python -m venv venv
 # Windows
 .\venv\Scripts\activate
-# Linux/macOS
+# Linux
 source venv/bin/activate
 ```
 
@@ -89,3 +89,4 @@ python manage.py runserver
 - `bluemarket/`: Project configuration (Settings, URLs).
 - `media/`: Uploaded product and profile images.
 - `requirements.txt`: Python package list.
+
