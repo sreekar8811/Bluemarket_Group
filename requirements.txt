@@ -1,0 +1,9 @@
+django
+psycopg2-binary
+requests
+pillow
+django-rest-framework
+stripe
+razorpay
+python-dotenv
+
