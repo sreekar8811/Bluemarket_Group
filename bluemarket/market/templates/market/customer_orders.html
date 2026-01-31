@@ -1,0 +1,52 @@
+{% extends 'market/base.html' %}
+
+{% block content %}
+<h2>My Orders</h2>
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Items</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>...{{ order.order_id|stringformat:"s"|slice:"-8:" }}</td>
+                <td>{{ order.order_date|date:"M d, Y" }}</td>
+                <td>₹{{ order.total_amount }}</td>
+                <td>
+                    <span style="padding: 3px 8px; border-radius: 4px; background: #eee;">{{ order.status }}</span>
+                    <br><small>Payment: {{ order.payment.method }} ({{ order.payment.status }})</small>
+                </td>
+                <td>
+                    {% for item in order.items.all %}
+                    <div>{{ item.quantity }}x {{ item.product.name }}</div>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if order.status == 'PENDING' or order.status == 'SHIPPING' %}
+                    <form action="{% url 'cancel_order_page' order.order_id %}" method="post"
+                        onsubmit="return confirm('Are you sure you want to cancel this order? Stock will be returned to the inventory.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" style="font-size: 0.8em;">Cancel</button>
+                    </form>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">You haven't placed any orders yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

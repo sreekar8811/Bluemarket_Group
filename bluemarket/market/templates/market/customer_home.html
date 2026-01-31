@@ -1,0 +1,36 @@
+{% extends 'market/base.html' %}
+
+{% block content %}
+<h2>Marketplace</h2>
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="card product-card">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+        {% else %}
+        <div style="height: 150px; background: #eee; display: flex; align-items: center; justify-content: center;">No
+            Image</div>
+        {% endif %}
+
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description|truncatechars:50 }}</p>
+        <p><strong>₹{{ product.price }}</strong></p>
+
+        {% if product.stock > 0 %}
+        <p style="color: green;">In Stock: {{ product.stock }}</p>
+        <form action="{% url 'buy_product_page' product.product_id %}" method="get">
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"
+                style="width: 60px; padding: 5px;">
+            <button type="submit" class="btn btn-primary">Buy Now</button>
+        </form>
+        {% else %}
+        <p style="color: red;">Out of Stock</p>
+        <button class="btn btn-danger" disabled>Sold Out</button>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No products available right now.</p>
+    {% endfor %}
+</div>
+{% endblock %}

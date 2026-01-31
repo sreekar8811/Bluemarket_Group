@@ -1,0 +1,13 @@
+{% extends 'market/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto;">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete product "<strong>{{ product.name }}</strong>"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'vendor_dashboard_page' %}" class="btn btn-primary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

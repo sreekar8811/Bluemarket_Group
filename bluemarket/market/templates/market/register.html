@@ -1,0 +1,15 @@
+{% extends 'market/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 40px auto;">
+    <h2>Register</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Register</button>
+    </form>
+    <p style="margin-top: 15px;">
+        Already have an account? <a href="{% url 'login_page' %}">Login here</a>
+    </p>
+</div>
+{% endblock %}

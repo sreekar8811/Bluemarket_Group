@@ -1,0 +1,117 @@
+{% extends 'market/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 40px auto;">
+    <h2>Confirm Your Order</h2>
+
+    <div style="display: flex; gap: 20px; align-items: start; margin-bottom: 30px;">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 150px; border-radius: 8px;">
+        {% else %}
+        <div
+            style="width: 150px; height: 150px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            No Image</div>
+        {% endif %}
+
+        <div style="flex: 1;">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <p><strong>Price:</strong> ₹{{ product.price }}</p>
+            <p><strong>Quantity:</strong> {{ quantity }}</p>
+            <hr>
+            <p style="font-size: 1.2em;"><strong>Total Amount:</strong> ₹{{ total_price }}</p>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Shipping Address</h3>
+        <textarea name="address" form="orderForm" required
+            style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+            placeholder="Enter your full delivery address..."></textarea>
+    </div>
+
+    <div class="card" style="background: #f9f9f9;">
+        <h3>Payment Method</h3>
+        <form id="orderForm" method="post" action="{% url 'buy_product_page' product.product_id %}">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="{{ quantity }}">
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="radio" name="payment_method" value="COD" checked>
+                    <span><strong>Cash on Delivery (COD)</strong></span>
+                </label>
+                <p style="margin-left: 25px; color: #666; font-size: 0.9em;">Pay in cash when your order is delivered to
+                    your doorstep.</p>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="radio" name="payment_method" value="RAZORPAY">
+                    <span><strong>Razorpay (Cards, UPI, Netbanking)</strong></span>
+                </label>
+                <p style="margin-left: 25px; color: #666; font-size: 0.9em;">Secure online payment via Razorpay.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <a href="{% url 'customer_home_page' %}" class="btn"
+                    style="background: #ccc; flex: 1; text-align: center; text-decoration: none; padding: 10px;">Cancel</a>
+                <button type="submit" id="submitBtn" class="btn btn-success" style="flex: 2;">Confirm Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if razorpay_order_id %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": "{{ total_price|floatformat:0 }}00",
+        "currency": "INR",
+        "name": "Blue Market",
+        "description": "Payment for {{ product.name }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            // Verify payment
+            fetch("{% url 'verify_razorpay_payment' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.href = "{% url 'customer_orders_page' %}";
+                    } else {
+                        alert("Payment verification failed: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("An error occurred during verification.");
+                });
+        },
+        "prefill": {
+            "name": "{{ request.user.customer_profile.name }}",
+            "email": "{{ request.user.customer_profile.email }}",
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response) {
+        alert("Payment Failed: " + response.error.description);
+    });
+    rzp1.open();
+</script>
+{% endif %}
+{% endblock %}
